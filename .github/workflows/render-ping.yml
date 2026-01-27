@@ -1,18 +1,39 @@
 name: Render Ping
 
 on:
+  # main에 커밋하면 바로 실행 (설정/동작 확인용)
   push:
     branches: [main]
+
+  # 스케줄 실행 (정각 부하 피하려고 3분부터 7분 간격)
   schedule:
     - cron: "3-59/7 * * * *"
+
+  # Actions 탭에서 수동 실행 버튼
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+
     steps:
       - name: Ping Render service
-        env:
-          PING_URL: ${{ secrets.RENDER_PING_URL || 'https://novel-trace.onrender.com/health' }}
+        shell: bash
         run: |
-          curl --fail --silent --show-error --max-time 30 "$PING_URL" > /dev/null
+          set -euo pipefail
+
+          # 1) Secret이 있으면 사용, 없으면 기본 URL 사용
+          PING_URL="${{ secrets.RENDER_PING_URL }}"
+          if [ -z "${PING_URL}" ]; then
+            PING_URL="https://novel-trace.onrender.com/health"
+          fi
+
+          echo "Event: ${{ github.event_name }}"
+          echo "UTC time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "Ping URL: ${PING_URL}"
+
+          # 2) Ping
+          curl --fail --silent --show-error --max-time 30 "${PING_URL}" > /dev/null
+
+          echo "OK"
