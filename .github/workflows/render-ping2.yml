@@ -7,7 +7,7 @@ on:
 
   # 3분 주기 실행
   schedule:
-    - cron: "*/3 * * * *"
+    - cron: "1-59/5 * * * *"  # 01,06,11,... 로 정각 회피
 
   # Actions 탭에서 수동 실행 버튼
   workflow_dispatch:
