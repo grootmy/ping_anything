@@ -1,0 +1,31 @@
+name: Temp Seoul 2024 Weather Export
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/temp-seoul-weather-2024.yml"
+      - "tmp/fetch_openmeteo_seoul_2024.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch Open-Meteo data
+        run: python tmp/fetch_openmeteo_seoul_2024.py
+      - name: Upload raw weather data
+        uses: actions/upload-artifact@v4
+        with:
+          name: seoul-2024-openmeteo-raw
+          path: raw/*
+          if-no-files-found: error
+          retention-days: 1
