@@ -37,6 +37,7 @@ ERA5_VARS = [
     "temperature_2m", "relative_humidity_2m", "dew_point_2m",
     "precipitation", "pressure_msl", "wind_speed_10m", "cloud_cover"
 ]
+FALLBACK_VARS = ["boundary_layer_height", "total_column_integrated_water_vapour"]
 
 class BadVariable(Exception):
     pass
@@ -96,12 +97,15 @@ out.mkdir(exist_ok=True)
 unsupported = []
 primary = fetch_isolated(PRIMARY_VARS, None, unsupported)
 era5 = fetch_isolated(ERA5_VARS, "era5", unsupported)
-if primary is None or era5 is None:
+fallback = fetch_isolated(FALLBACK_VARS, "era5", unsupported)
+if primary is None or era5 is None or fallback is None:
     raise SystemExit("required dataset could not be fetched")
-for name, payload in (("primary.json", primary), ("era5.json", era5)):
+for name, payload in (("primary.json", primary), ("era5.json", era5), ("fallback.json", fallback)):
     (out / name).write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 (out / "unsupported.json").write_text(json.dumps(unsupported, ensure_ascii=False, indent=2), encoding="utf-8")
 print("PRIMARY_ROWS", len(primary["hourly"]["time"]))
 print("PRIMARY_VARIABLES", sorted(k for k in primary["hourly"] if k != "time"))
 print("ERA5_ROWS", len(era5["hourly"]["time"]))
+print("FALLBACK_ROWS", len(fallback["hourly"]["time"]))
+print("FALLBACK_VARIABLES", sorted(k for k in fallback["hourly"] if k != "time"))
 print("UNSUPPORTED", unsupported)
