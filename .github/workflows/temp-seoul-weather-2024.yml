@@ -5,7 +5,12 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/temp-seoul-weather-2024.yml"
-      - "tmp/fetch_openmeteo_seoul_2024.py"
+      - "tmp/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/temp-seoul-weather-2024.yml"
+      - "tmp/**"
   workflow_dispatch:
 
 permissions:
